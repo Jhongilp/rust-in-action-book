@@ -53,22 +53,63 @@ fn close(f: File) -> Result<File, String> {
     Ok(f)
 }
 
+// enums
+#[derive(Debug)]
+enum Event {
+    Update,
+    Delete,
+    Unknown,
+}
+
+type Message = String;
+
+fn parse_Log(line: &'static str) -> (Event, Message) {
+    let parts: Vec<&str> = line.splitn(2, ' ').collect();
+    if parts.len() == 1 {
+        return (Event::Unknown, String::from(line))
+    }
+
+    let event = parts[0];
+    let rest = String::from(parts[1]);
+
+    match event {
+        "UPDATE" | "update" => (Event::Update, rest),
+        "DELETE" | "delete" => (Event::Delete, rest),
+        _ => (Event::Unknown, String::from(line)),
+    }
+}
+
+
 
 fn main() {
-    println!("Hello, world!");
 
-    let f_data = vec![114, 117, 115, 116, 33];
-    let mut f = File::new_with_data("f3.txt", &f_data);
+    let log = "BEGIN Transaction XK342
+UPDATE 234:LS/32231 {\"price\": 31.00} -> {\"price\": 40.00}
+DELETE 342:LO/22111";
 
-    let mut buffer: Vec<u8> = vec![];
+    for line in log.lines() {
+        let parse_result = parse_Log(line);
+        println!("{:?}", parse_result);
+    }
 
-    f = open(f).unwrap();
-    let f_length = f.read(&mut buffer).unwrap();
-    f = close(f).unwrap();
+    // println!("Hello, world!");
 
-    let text = String::from_utf8_lossy(&buffer);
+    // let f_data = vec![114, 117, 115, 116, 33];
+    // let mut f = File::new_with_data("f3.txt", &f_data);
 
-    println!("{:?}", f);
-    println!("{} is {} bytes long", &f.name, f_length);
-    println!("text: {}", text);
+    // let mut buffer: Vec<u8> = vec![];
+
+    // f = open(f).unwrap();
+    // let f_length = f.read(&mut buffer).unwrap();
+    // f = close(f).unwrap();
+
+    // let text = String::from_utf8_lossy(&buffer);
+
+    // println!("{:?}", f);
+    // println!("{} is {} bytes long", &f.name, f_length);
+    // println!("text: {}", text);
 }
+
+
+
+
