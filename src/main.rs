@@ -1,5 +1,6 @@
 extern crate rand;
 use rand::Rng;
+use std::fmt;
 
 fn one_in(n: u32) -> bool {
     rand::thread_rng().gen_weighted_bool(n)
@@ -11,11 +12,27 @@ enum FileState {
     Closed,
 }
 
+impl fmt::Display for FileState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            FileState::Open => write!(f, "OPEN"),
+            FileState::Closed => write!(f, "CLOSED")
+        }
+        
+    }
+}
+
 #[derive(Debug)]
 struct File {
     name: String,
     data: Vec<u8>,
     state: FileState
+}
+
+impl fmt::Display for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "The File {} has {} bytes and his state is {}", self.name, self.data.len(), self.state)
+    }
 }
 
 impl File {
@@ -69,49 +86,7 @@ fn close(mut f: File) -> Result<File, String> {
     Ok(f)
 }
 
-// enums
-// #[derive(Debug)]
-// enum Event {
-//     Update,
-//     Delete,
-//     Unknown,
-// }
-
-// type Message = String;
-
-// fn parse_Log(line: &'static str) -> (Event, Message) {
-//     let parts: Vec<&str> = line.splitn(2, ' ').collect();
-//     if parts.len() == 1 {
-//         return (Event::Unknown, String::from(line))
-//     }
-
-//     let event = parts[0];
-//     let rest = String::from(parts[1]);
-
-//     match event {
-//         "UPDATE" | "update" => (Event::Update, rest),
-//         "DELETE" | "delete" => (Event::Delete, rest),
-//         _ => (Event::Unknown, String::from(line)),
-//     }
-// }
-
-
-
-
-
-
 fn main() {
-
-//     let log = "BEGIN Transaction XK342
-// UPDATE 234:LS/32231 {\"price\": 31.00} -> {\"price\": 40.00}
-// DELETE 342:LO/22111";
-
-//     for line in log.lines() {
-//         let parse_result = parse_Log(line);
-//         println!("{:?}", parse_result);
-//     }
-
-    println!("Hello, world!");
 
     let f_data = vec![114, 117, 115, 116, 33];
     let mut f = File::new_with_data("f3.txt", &f_data);
@@ -124,7 +99,8 @@ fn main() {
 
     let text = String::from_utf8_lossy(&buffer);
 
-    println!("{:?}", f);
+    println!("File INFO: {}", f);
+    println!("{}", f.state);
     println!("{} is {} bytes long", &f.name, f_length);
     println!("text: {}", text);
 }
