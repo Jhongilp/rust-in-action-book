@@ -2,3 +2,8 @@
 
 ## Chapter 4: The borrow checker: borrowing, lifetimes and ownership
 
+
+## Ways to handle ownership
+
+- 1. using reference:
+
