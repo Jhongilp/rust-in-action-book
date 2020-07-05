@@ -1,6 +1,5 @@
 #![allow(unused_variables)]
 
-
 struct GroundStation;
 
 impl GroundStation {
