@@ -61,3 +61,6 @@ fn main() {
 
 }
 ```
+
+- 2. Use Fewer Long-Lived Values
+This methodology is not practical since the instance of the value must be valid for the whole program

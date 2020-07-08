@@ -3,11 +3,15 @@
 struct GroundStation;
 
 impl GroundStation {
-    fn send(&self, to: &mut CubeSat, msg: Message) {
-        to.mailbox.messages.push(msg);
+    fn connect(&self, sat_id: u64) -> CubeSat {
+        CubeSat { id: sat_id, mailbox: Mailbox { messages: vec![]}}
     }
-}
 
+    fn send(&self, mailbox: &mut Mailbox, msg: Message) {
+        mailbox.post(msg);
+    }
+
+}
 
 #[derive(Debug)]
 struct CubeSat {
@@ -16,14 +20,9 @@ struct CubeSat {
 }
 
 impl CubeSat {
-    fn recv(&mut self) -> Option<Message> {
-        self.mailbox.messages.pop()
+    fn recv(&self, mailbox: &mut Mailbox) -> Option<Message> {
+        mailbox.deliver(&self)
     }
-}
-
-#[derive(Debug)]
-enum StatusMessage {
-    Ok,
 }
 
 #[derive(Debug)]
@@ -31,24 +30,49 @@ struct Mailbox {
     messages: Vec<Message>,
 }
 
-type Message = String;
+impl Mailbox {
+    fn post(&mut self, msg: Message) {
+        self.messages.push(msg);
+    }
 
-fn check_status(sat_id: CubeSat) -> CubeSat {
-    println!("{:?}: {:?}", sat_id, StatusMessage::Ok);
-    sat_id
+    fn deliver(&mut self, recipient: &CubeSat) -> Option<Message> {
+        for i in 0..self.messages.len() {
+            let msg = self.messages.remove(i);
+            return Some(msg);
+        }
+        None
+    }
+}
+
+#[derive(Debug)]
+struct Message {
+    to: u64,
+    content: String,
+}
+
+fn fetch_sat_ids() -> Vec<u64> {
+    vec![1,2,3]
 }
 
 fn main() {
+
+    let mut mail = Mailbox { messages: vec![]};
+
     let base = GroundStation {};
-    let mut sat_a = CubeSat { id:0001, mailbox: Mailbox { messages: vec![]}};
-    
-    println!("t0: {:?}", sat_a);
-    base.send(&mut sat_a, Message::from("hello there!"));
-    println!("t1: {:?}", sat_a);
-    
-    let msg = sat_a.recv();
-    println!("t2: {:?}", sat_a);
+    let sat_ids = fetch_sat_ids();
 
-    println!("msg: {:?}", msg);
+    for sat_id in sat_ids {
+        let sat = base.connect(sat_id);
+        let msg = Message { to: sat_id, content: String::from("hello")};
+        base.send(&mut mail, msg);
+    }
 
+    let sat_ids = fetch_sat_ids();
+
+    for sat_id in sat_ids {
+        let sat = base.connect(sat_id);
+        let msg = sat.recv(&mut mail);
+        println!("{:?}: {:?}", sat, msg);
+    }
+    // println!("{:?}", );
 }
